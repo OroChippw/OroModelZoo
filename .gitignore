@@ -1,2 +1,8 @@
 # vscode
-.json
+*.json
+
+# data
+*.jpg
+*.jpeg
+*.png
+*.tif
