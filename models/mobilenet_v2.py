@@ -2,7 +2,7 @@ import math
 import torch 
 import torch.nn as nn 
 from .base_module import BaseModule
-
+from utils import InvertedresBlock
 def _make_divisible(channels , divisor , min_channels):
     '''
     Functions:
@@ -38,47 +38,14 @@ class Conv(BaseModule):
         return result_
 
 
-class InvertedresBlock(BaseModule):
-    '''
-    InvertedResidual block for MobileNetV2
-    Args:
-        expand_ratio : expansion factor
-
-    '''
-    def __init__(self , in_channels , out_channels , stride , expand_ratio):
-        super(InvertedresBlock, self).__init__()
-
-        hidden_channel = round(in_channels * expand_ratio)
-        self.use_shortcut = (stride == 1) and (in_channels == out_channels)
-
-        layers = []
-        if expand_ratio != 1 : 
-            layers.append(Conv(in_channels, hidden_channel , kernel_size=1))
-        
-        layers.append([
-            # Depthwise Conv
-            Conv(hidden_channel, hidden_channel ,stride=stride , 
-                groups=hidden_channel),
-            # Pointwise Conv ,  is equivalent to a Linear
-            nn.Conv2d(hidden_channel, out_channels, kernel_size = 1 , bias=True),
-            nn.BatchNorm2d(out_channels)
-        ])
-
-        self.Conv2d = nn.Sequential(*layers)
-
-    def forward(self , x):
-        input_ = x
-        if self.use_shortcut : 
-            return input_ + self.Conv2d(input_)
-        else :
-            return self.Conv2d(input_)
-    
 
 class MobileNetv2(BaseModule):
-    def __init__(self , alpha : float = 1.0 , num_classes : int = 1000):
+    def __init__(self , widen_factor : float = 1.0 , num_classes : int = 1000 , pretrained = None):
         super(MobileNetv2 , self).__init__()
+        self.pretrained = pretrained
+
         # setting of inverted residual blocks
-        # t (expand_ratio), c (input_channels), n (num), s (stride)
+        # t (expand_ratio), c (input_channels), n (num_blocks), s (stride)
         self.cfgs = [
             [1,16,1,1],
             [6,24,2,2],
@@ -91,14 +58,14 @@ class MobileNetv2(BaseModule):
 
         layers = []
         # building first layer
-        input_channels = _make_divisible(32 * alpha, 
-                                        divisor = 4 if alpha == 0.1 else 8)
+        input_channels = _make_divisible(32 * widen_factor, 
+                                        divisor = 4 if widen_factor == 0.1 else 8)
         layers.append(Conv(in_channels = 3, out_channels = input_channels , stride = 2))
         
         # building inverted residual blocks
         for t , c , n , s in self.cfgs : 
-            out_channels = _make_divisible(c * alpha, 
-                                        divisor = 4 if alpha == 0.1 else 8)
+            out_channels = _make_divisible(c * widen_factor, 
+                                        divisor = 4 if widen_factor == 0.1 else 8)
             for i in range(n):
                 stride = s if i == 0 else 1
                 layers.append(
@@ -107,8 +74,8 @@ class MobileNetv2(BaseModule):
                 input_channels = out_channels
             
         # building last several layers
-        output_channels = _make_divisible(1280 * alpha, 
-                                        divisor = 4 if alpha == 0.1 else 8)
+        output_channels = _make_divisible(1280 * widen_factor, 
+                                        divisor = 4 if widen_factor == 0.1 else 8)
         layers.append(Conv(in_channels = input_channels, out_channels=output_channels , stride = 1))
         # building net skeletion
         self.skeleton_ = nn.Sequential(*layers)
