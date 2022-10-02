@@ -1,3 +1,3 @@
-from invertedres_block import InvertedresBlock
+from .invertedres_block import InvertedresBlock
 
-all = ["InvertedresBlock"]
+all = ["InvertedresBlock" , ]

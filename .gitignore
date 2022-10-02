@@ -6,3 +6,9 @@
 *.jpeg
 *.png
 *.tif
+
+# model
+/weights
+*.pth
+*.onnx
+*.tflite

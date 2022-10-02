@@ -2,8 +2,9 @@ import math
 import torch 
 import torch.nn as nn 
 from .base_module import BaseModule
-from utils import InvertedresBlock
-def _make_divisible(channels , divisor , min_channels):
+from .utils import InvertedresBlock
+
+def _make_divisible(channels , divisor , min_channels = None):
     '''
     Functions:
         ensures that all layers have a channel number that is divisible by 8
@@ -28,7 +29,7 @@ class Conv(BaseModule):
         self.Conv2d = nn.Sequential(
             nn.Conv2d(in_channels = in_channels, out_channels = out_channels, 
             kernel_size = kernel_size , stride = stride , padding = padding , 
-            group = 1 , bias = False),
+            groups = groups , bias = False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU6(inplace=True)
         )
@@ -45,7 +46,7 @@ class MobileNetv2(BaseModule):
         self.pretrained = pretrained
 
         # setting of inverted residual blocks
-        # t (expand_ratio), c (input_channels), n (num_blocks), s (stride)
+        # t (expand_ratio), c (kernel size), n (block replace num), s (first block stride)
         self.cfgs = [
             [1,16,1,1],
             [6,24,2,2],
@@ -83,6 +84,8 @@ class MobileNetv2(BaseModule):
         self.pool_ = nn.AdaptiveAvgPool2d((1,1))
 
         self.head_ = nn.Linear(output_channels, num_classes)
+
+        self._initialize_weights()
     
     def _initialize_weights(self):
         for m in self.modules():
@@ -100,7 +103,7 @@ class MobileNetv2(BaseModule):
 
     def forward(self, x):
         input_ = x
-        temp_ = self.skeleton_(input)
+        temp_ = self.skeleton_(input_)
         temp_ = self.pool_(temp_)
         temp_ = temp_.view(x.size(0) , -1)
         result_ = self.head_(temp_)
