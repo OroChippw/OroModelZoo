@@ -15,8 +15,8 @@ def main():
     #         "file {} does not exist".format(weight_path)
     # pretrained_weights = torch.load(weight_path , map_location=device)
 
-    # net = MobileNetv2(widen_factor=1.0)
-    net = MobileNet_v3_large()
+    net = MobileNetv2(widen_factor=0.75)
+    # net = MobileNet_v3_large()
     # net = MobileNet_v3_small()
 
     net.to(device)

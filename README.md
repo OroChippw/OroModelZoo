@@ -19,3 +19,11 @@ MobileNetv3
     重构耗时结构  
     Modify the number of channels of the head convolution kernel. Mobilenet v2 uses 32 x 3 x 3. The author found that 32 can actually be reduced a little bit, so here the author changed it to 16, which is reduced by 3ms on the premise of ensuring the accuracy. speed
     
+ShuffleNetv1  
+    Group Pointwise Convlution ：分组1*1卷积
+    Limited : 近亲繁殖
+    Channel Shuffle ：通道重排，实现跨组信息交流 
+        Reshape成g行n列矩阵，转置，再进行Flatten
+        可微分可导不引入额外参数
+ShuffleNetv2  
+

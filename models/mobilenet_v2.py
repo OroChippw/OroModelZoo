@@ -8,16 +8,13 @@ def _make_divisible(channels, divisor, min_channels=None):
     Functions:
         ensures that all layers have a channel number that is divisible by 8
     '''
-    print("input_channels : " , channels)
     if min_channels is None:
         min_channels = divisor
     new_channels = max(min_channels,
                        int(channels + divisor / 2) // divisor * divisor)
-    print("temp_channels : " , new_channels)
     # Make sure that round down does not go down by more than 10%.
     if new_channels < 0.9 * channels:
         new_channels += divisor
-    print("final new_channels : " , new_channels)
     return new_channels
 
 
@@ -46,7 +43,8 @@ class MobileNetv2(BaseModule):
         self.pretrained = pretrained
 
         # setting of inverted residual blocks
-        # t (expand_ratio), c (kernel size), n (block replace num), s (first block stride)
+        # t (expand_ratio), c (output_channels), n (block replace num), s (first block stride)
+        #
         self.cfgs = [
             [1, 16, 1, 1],
             [6, 24, 2, 2],
