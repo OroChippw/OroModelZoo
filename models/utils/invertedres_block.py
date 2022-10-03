@@ -1,6 +1,5 @@
-import torch
 import torch.nn as nn
-from ..base_module import BaseModule
+from models.backbones import BaseModule
 
 # BaseConv or # Depthwise Separable Convolution，DSC
 class Conv(BaseModule):
