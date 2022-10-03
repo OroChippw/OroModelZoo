@@ -1,6 +1,9 @@
 # vscode
 *.json
 
+# pycharm
+.idea
+
 # data
 *.jpg
 *.jpeg
