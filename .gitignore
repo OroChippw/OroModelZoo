@@ -5,10 +5,22 @@
 .idea
 
 # data
+/data
 *.jpg
 *.jpeg
 *.png
 *.tif
+
+# initiator
+#*.sh
+
+# process
+/events
+*.log
+
+# result
+/work_dirs
+
 
 # model
 /weights
