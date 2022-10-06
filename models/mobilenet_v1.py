@@ -49,7 +49,7 @@ class DSConvBlock(BaseModule):
 
         return result_
 
-# @BACKBONE.register_module()
+@BACKBONE.register_module()
 class MobileNetv1(BaseModule):
     def __init__(self):
         super(MobileNetv1, self).__init__()
