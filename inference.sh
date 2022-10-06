@@ -1,0 +1,1 @@
+python inference.py --img_path E:\OroChippwLab\MobileNet_pytorch\data\test\airplane.jpg --ckpt_path E:\OroChippwLab\MobileNet_pytorch\work_dirs\mobilenetv2_19.pth

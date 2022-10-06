@@ -1,10 +1,13 @@
 import argparse
 import os
+import sys
+
 import torch
 import torchvision
 import logging
 import time
 import os.path as osp
+from tqdm import tqdm
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -32,7 +35,7 @@ def args_parse():
     parse.add_argument(
         '--batch_size' ,
         type=int ,
-        default=16 ,
+        default=24 ,
         help='batch size')
     parse.add_argument(
         '--weights' ,
@@ -60,50 +63,6 @@ def args_parse():
 
     args = parse.parse_args()
     return args
-
-def train_one_epoch(model , optimizer , loss , lr_schedule , epoch , log_interval ,
-                    dataloader , device , batch_size):
-    start_time = time.time()
-    all_loss = 0.0
-    all_acc = 0
-    model.train()
-    for idx , (img , labels) in enumerate(dataloader):
-        img = img.to(device)
-        labels = labels.to(device)
-        pred_ = model(img)
-        loss_ = loss(pred_ , labels)
-
-        optimizer.zero_grad()
-        cur_acc = (pred_.data.max(dim = 1)[1]==labels).sum()
-
-        all_acc += cur_acc
-
-        if idx % log_interval == 0 :
-            logging.info("epoch:{} iters:{}/{} loss:{} acc:{} lr:{}" \
-                         .format(epoch,idx,len(dataloader),loss_.item(),cur_acc*100/len(labels),
-                                 optimizer.param_groups[0]['lr']))
-
-        lr_schedule.step(loss_.item())
-
-    end_time = time.time()
-    all_loss /= len(dataloader)
-    # acc_ = all_acc *100 / len(dataloader) * batch_size
-    return all_loss
-def model_val(model , dataloader , epoch , device):
-    start = time.time()
-    model.eval()
-    all_acc = 0
-    for idx , (img , labels) in enumerate(dataloader):
-        img = img.to(device)
-        labels = labels.to(device)
-        pred_ = model(img)
-
-        cur_acc = (pred_.data.max(dim = 1)[1] == labels).sum() / len(labels)
-        all_acc += cur_acc
-
-    end_time = time.time()
-    print("epoch:{} acc:{}".format(epoch,all_acc*100/len(dataloader)))
-    return all_acc/len(dataloader)
 
 def main():
     args = args_parse()
@@ -146,47 +105,66 @@ def main():
     logging.info("Loading Datasets...")
     writer = SummaryWriter('events')
 
-    net = MobileNetv2(widen_factor=0.75 , num_classes=10).to(device)
-    summary(net , (3,224,224))
+    net = MobileNetv2(widen_factor=1.0 , num_classes=10).to(device)
+    # summary(net , (3,224,224))
     # net = MobileNet_v3_large()
     # net = MobileNet_v3_small()
 
-    optimizer = optim.SGD([p for p in net.parameters() if p.requires_grad],
-                          lr=0.01, momentum=0.9, weight_decay=5e-4,
-                          nesterov=True)
-    loss = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(net.parameters() , lr = 0.0001)
+    loss_func = nn.CrossEntropyLoss()
     # lr_schedule = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
     #                                                    factor=0.5, patience=200, min_lr=1e-6)
-    lr_schedule = optim.lr_scheduler.StepLR(optimizer, step_size=1,gamma=0.1,
-                                                       last_epoch=-1)
+    # lr_schedule = optim.lr_scheduler.StepLR(optimizer, step_size=1,gamma=0.1,
+    #                                                    last_epoch=-1)
 
-    start_epoches = 0
     logging.info("Training...")
 
-    for epoch in range(start_epoches , args.epoches):
-        mean_loss = train_one_epoch(net , optimizer , loss , lr_schedule , epoch , args.log_interval ,
-                                    train_dataloader ,device , args.batch_size)
-        writer.add_scalar('train_loss' , mean_loss , epoch)
+    best_acc = 0.0
+    for epoch in range(args.epoches):
+        net.train()
+        running_loss = 0.0
+        train_bar = tqdm(train_dataloader , file=sys.stdout)
+        for idx , data in enumerate(train_bar):
+            images , labels = data
+            optimizer.zero_grad()# 清空之前的梯度信息进行正向传播
+            pred_ = net(images.to(device))
+            loss_ = loss_func(pred_ , labels.to(device))
+            loss_.backward()# 将得到的损失反向传播到每个节点中
+            optimizer.step()# 更新每个节点的参数
 
-        val_acc = model_val(net , val_dataloader , epoch , device)
+            running_loss += loss_.item()
+            train_bar.desc = "train epoch[{}/{}] loss:{:.3f}" \
+                .format(epoch + 1,args.epoches,loss_)
+
+        writer.add_scalar('train_loss' , running_loss , epoch)
+
+        net.eval()
+        eval_acc = 0.0
+        with torch.no_grad():
+            val_bar = tqdm(val_dataloader , file=sys.stdout)
+            for val_data in val_bar:
+                images , labels = val_data
+                output_ = net(images.to(device))
+                predict_ = torch.max(output_ , dim=1)[1]
+                eval_acc += torch.eq(predict_ , labels.to(device)).sum().item()
+        val_acc = eval_acc / len(val_datasets)
         writer.add_scalar('val_acc',val_acc,epoch)
 
-        if (epoch + 1) % args.save_interval == 0 :
-            weight_path_save_path = osp.join(args.save_dir , 'mobilenetv2_{}'.format(epoch))
-            save_params = {
-                'model':net.state_dict(),
-                'epoch':epoch,
-                'optim':optimizer.state_dict()
-            }
-            torch.save(save_params , weight_path_save_path)
+        print('[epoch %d] train_loss: %.3f  val_accuracy: %.3f' %
+              (epoch + 1, running_loss / len(train_dataloader), val_acc))
+
+        if (epoch + 1) % args.save_interval == 0 and val_acc > best_acc:
+            best_acc = val_acc
+            weight_path_save_path = osp.join(args.save_dir , 'mobilenetv2_{}.pth'.format(epoch + 1))
+            torch.save(net.state_dict() , weight_path_save_path)
+
+    logging.info("Finish Training")
 
 
 
-
-
-    result_ = net(a)
-    print(result_)
-    print(result_.shape)
+    # result_ = net(a)
+    # print(result_)
+    # print(result_.shape)
 
 
 if __name__ == '__main__':
