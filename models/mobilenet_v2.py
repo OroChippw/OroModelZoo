@@ -2,6 +2,7 @@ import math
 import torch.nn as nn
 from .base_module import BaseModule
 from .utils import InvertedresBlock
+from .builder import BACKBONE
 
 def _make_divisible(channels, divisor, min_channels=None):
     '''
@@ -36,7 +37,7 @@ class Conv(BaseModule):
         result_ = self.Conv2d(x)
         return result_
 
-
+@BACKBONE.register_module()
 class MobileNetv2(BaseModule):
     def __init__(self, widen_factor: float = 1.0, num_classes: int = 1000, pretrained=None):
         super(MobileNetv2, self).__init__()

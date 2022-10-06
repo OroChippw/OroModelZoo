@@ -26,7 +26,7 @@ from models import MobileNet_v3_large ,MobileNet_v3_small
 logging.getLogger().setLevel(logging.INFO)
 
 def args_parse():
-    parse = argparse.ArgumentParser()
+    parse = argparse.ArgumentParser(description="Train model args")
     parse.add_argument(
         '--epoches' ,
         type=int ,
@@ -110,7 +110,7 @@ def main():
     # net = MobileNet_v3_large()
     # net = MobileNet_v3_small()
 
-    optimizer = optim.Adam(net.parameters() , lr = 0.0001)
+    optimizer = optim.SGD(net.parameters() , lr = 0.001 ,momentum=0.9)
     loss_func = nn.CrossEntropyLoss()
     # lr_schedule = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
     #                                                    factor=0.5, patience=200, min_lr=1e-6)

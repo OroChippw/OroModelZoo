@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from .base_module import BaseModule
+from .builder import BACKBONE
 
 
 # BaseConv
@@ -48,7 +49,7 @@ class DSConvBlock(BaseModule):
 
         return result_
 
-
+# @BACKBONE.register_module()
 class MobileNetv1(BaseModule):
     def __init__(self):
         super(MobileNetv1, self).__init__()

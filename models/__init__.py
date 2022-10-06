@@ -1,4 +1,5 @@
 from .base_module import BaseModule
+from .builder import build_backbone
 from .alexnet import AlexNet
 from .mobilenet_v1 import MobileNetv1
 from .mobilenet_v2 import MobileNetv2
