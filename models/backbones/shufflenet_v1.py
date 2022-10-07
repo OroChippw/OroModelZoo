@@ -1,5 +1,6 @@
 import torch.nn as nn
-from .base_module import BaseModule
+from ..base_module import BaseModule
+from ..builder import BACKBONE
 
 class ShuffleNetv1(BaseModule):
     def __init__(self):

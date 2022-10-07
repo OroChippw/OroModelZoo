@@ -1,5 +1,7 @@
 import torch.nn as nn
-from .base_module import BaseModule
+from ..base_module import BaseModule
+from ..builder import BACKBONE
+
 
 class AlexNet(BaseModule):
     def __init__(self , num_classes : int = 1000 , init_weight : bool = False):

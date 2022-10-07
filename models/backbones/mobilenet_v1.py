@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from .base_module import BaseModule
-from .builder import BACKBONE
+from ..base_module import BaseModule
+from ..builder import BACKBONE
 
 
 # BaseConv

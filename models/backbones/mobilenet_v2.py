@@ -1,8 +1,8 @@
 import math
 import torch.nn as nn
-from .base_module import BaseModule
-from .utils import InvertedresBlock
-from .builder import BACKBONE
+from ..base_module import BaseModule
+from ..utils import InvertedresBlock
+from ..builder import BACKBONE
 
 def _make_divisible(channels, divisor, min_channels=None):
     '''

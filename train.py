@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from models import MobileNetv1
 from models import MobileNetv2
-from models import MobileNet_v3_large ,MobileNet_v3_small
+# from models import MobileNet_v3_large ,MobileNet_v3_small
 
 
 logging.getLogger().setLevel(logging.INFO)
