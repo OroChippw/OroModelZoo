@@ -3,6 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base_module import BaseModule
 
+class Conv(BaseModule):
+    def __init__(self):
+        super(Conv, self).__init__()
+
+    def forward(self, x):
+        result_ = self.Conv2d(x)
+        return result_
+
+
 class ShuffleBlock(BaseModule):
     def __init__(self , in_channels , hidden_channels , out_channels , kernel_size , stride ,
                  group ,is_firstgroup : bool = False):
@@ -10,8 +19,15 @@ class ShuffleBlock(BaseModule):
         assert stride in [1,2], f'stride must in [1, 2]. ' \
                                  f'But received {stride}.'
         self.stride = stride
+        self.group = group
+        self.is_firstgroup = is_firstgroup
 
         layers = []
+
+
+        branch_main_1 = []
+
+        branch_main_2 = []
 
         if self.stride == 1 :
             layers.extend(
@@ -24,16 +40,20 @@ class ShuffleBlock(BaseModule):
             )
             pass
         elif self.stride == 2:
-            pass
+            if self.is_firstgroup:
+                pass
+            else :
+                pass
 
         self.branch_ = nn.Sequential(*layers)
 
         if self.stride == 2:
-            self.branch_pool = nn.AvgPool2d(kernel_size=3 , stride=2)
+            self.branch_pool = nn.AvgPool2d(kernel_size=3 , stride=2 , padding=1)
 
     def channel_shuffle(self , x):
         b , c , h , w = x.size()
         assert
+        return x
 
     def forward(self, x):
         input_ = x
@@ -41,4 +61,4 @@ class ShuffleBlock(BaseModule):
         if self.stride == 1 :
             return F.relu(input_ + result_)
         elif self.stride == 2 :
-            return F.relu(torch.cat((self.branch_pool(input_))))
+            return F.relu(torch.cat((self.branch_pool(input_) , result_) , dim=1))

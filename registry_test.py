@@ -1,8 +1,6 @@
 from models import build_backbone
 
-cfg = dict(
-    backbone=dict(type='MobileNetv2')
-)
+
 
 class TempModel():
     def __init__(self , backbone):

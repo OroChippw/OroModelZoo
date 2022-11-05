@@ -5,4 +5,6 @@ from .mobilenet_v3 import MobileNet_v3_small , MobileNet_v3_large
 from .shufflenet_v1 import ShuffleNetv1
 from .shufflenet_v2 import ShuffleNetv2
 
+from .unet import import UNet
+
 __all__ = ["AlexNet" , "MobileNetv1" , "MobileNetv2"]
