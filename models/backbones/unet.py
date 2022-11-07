@@ -104,7 +104,7 @@ class Unet(BaseModule):
         self.decoder_1 = DecoderBlock(output_channels[3] , output_channels[1])
         self.decoder_0 = DecoderBlock(output_channels[2] , output_channels[0])
 
-        self.head_ = OutputHead(output_channels[0] , output_channels[0] , final_channels=2)
+        self.head_ = OutputHead(output_channels[0] , output_channels[0] , final_channels=classes)
 
 
     def forward(self, x):
