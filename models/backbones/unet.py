@@ -1,27 +1,38 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base_module import BaseModule
-from ..builder import BACKBONE
+from torchsummary import summary
+# from ..base_module import BaseModule
+# from ..builder import BACKBONE
+
+class BaseModule(nn.Module):
+    def __init__(self):
+        super(BaseModule, self).__init__()
+
+    def forward(self, x):
+        pass
+
+    def train(self, mode=True):
+        pass
 
 class EncoderBlock(BaseModule):
-    def __init__(self , in_channels , out_channels , use_maxpool = False):
+    def __init__(self , in_channels , out_channels , use_maxpool = True):
         super(EncoderBlock, self).__init__()
         self.use_maxpool = use_maxpool
         self.baseConvBlock = nn.Sequential(
             nn.Conv2d(in_channels=in_channels , out_channels=out_channels ,
-                      kernel_size=3 , stride=1 , padding=1) ,
+                      kernel_size=3 , stride=1) ,
             nn.BatchNorm2d(out_channels) ,
             nn.ReLU() ,
             nn.Conv2d(in_channels=out_channels, out_channels=out_channels,
-                      kernel_size=3, stride=1, padding=1),
+                      kernel_size=3, stride=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
         )
-        self.downsample_byMaxPool = nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
+        self.downsample_byMaxPool = nn.MaxPool2d(kernel_size=2,stride=2)
         self.downsample_byConv2d = nn.Sequential(
             nn.Conv2d(in_channels=out_channels , out_channels=out_channels ,
-                      kernel_size=3 , stride=2 , padding=1),
+                      kernel_size=3 , stride=2 ,  padding=1),
             nn.BatchNorm2d(out_channels) ,
             nn.ReLU()
         )
@@ -42,11 +53,11 @@ class DecoderBlock(BaseModule):
         super(DecoderBlock, self).__init__()
         self.baseConvBlock = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels * 2,
-                      kernel_size=3, stride=1, padding=1),
+                      kernel_size=3, stride=1),
             nn.BatchNorm2d(out_channels * 2),
             nn.ReLU(),
             nn.Conv2d(in_channels=out_channels * 2, out_channels=out_channels * 2,
-                      kernel_size=3, stride=1, padding=1),
+                      kernel_size=3, stride=1),
             nn.BatchNorm2d(out_channels * 2),
             nn.ReLU(),
         )
@@ -57,12 +68,27 @@ class DecoderBlock(BaseModule):
             nn.BatchNorm2d(out_channels) ,
             nn.ReLU() ,
         )
+    
+
+    def concat_(self , input_1 , input_2):
+        '''
+            copy and crop
+        '''
+        shape_1 = input_1.size()[3]
+        shape_2 = input_2.size()[3]
+        tensor_1 , tensor_2 = (input_1 , input_2) if shape_1 >= shape_2 else (input_2 , input_1)
+        crop_ = int((tensor_1.size()[3] - tensor_2.size()[3]) / 2)
+        tensor_1 = tensor_1[: , : , crop_:tensor_1.size()[3]-crop_ : , 
+                            crop_:tensor_1.size()[3]-crop_]
+        result_ = torch.cat((tensor_1 , tensor_2) , dim=1)
+        return result_
+
 
     def forward(self, x1 , encode_):
         input_ = x1
         temp_ = self.baseConvBlock(input_)
         temp_ = self.upsample_(temp_)
-        result_ = torch.cat((temp_ , encode_) , dim=1)
+        result_ = self.concat_(temp_ , encode_)
         return result_
 
 class OutputHead(BaseModule):
@@ -70,25 +96,25 @@ class OutputHead(BaseModule):
         super(OutputHead , self).__init__()
         self.baseConvBlock = nn.Sequential(
             nn.Conv2d(in_channels=in_channels , out_channels=out_channels, 
-                      kernel_size=3 , stride=1 , padding=1),
+                      kernel_size=3 , stride=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
             nn.Conv2d(in_channels=out_channels , out_channels=out_channels, 
-                      kernel_size=3 , stride=1 , padding=0),
+                      kernel_size=3 , stride=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
             nn.Conv2d(in_channels=out_channels , out_channels=final_channels , 
-                    kernel_size=1 , stride=1 , padding=0),
+                    kernel_size=1 , stride=1),
             nn.BatchNorm2d(final_channels),
         )
         
     def forward(self, x):
         input_ = x 
         temp_ = self.baseConvBlock(input_)
-        result_ = F.sigmoid(temp_)
+        result_ = torch.sigmoid(temp_)
         return result_
 
-@BACKBONE.register_module(BaseModule)
+# @BACKBONE.register_module(BaseModule)
 class Unet(BaseModule):
     def __init__(self , classes):
         super(Unet, self).__init__()
@@ -104,7 +130,7 @@ class Unet(BaseModule):
         self.decoder_1 = DecoderBlock(output_channels[3] , output_channels[1])
         self.decoder_0 = DecoderBlock(output_channels[2] , output_channels[0])
 
-        self.head_ = OutputHead(output_channels[0] , output_channels[0] , final_channels=classes)
+        self.head_ = OutputHead(output_channels[1] , output_channels[0] , final_channels=classes)
 
 
     def forward(self, x):
@@ -133,3 +159,8 @@ class Unet(BaseModule):
         result_ = self.head_(upsample_0)
 
         return result_
+
+if __name__ == '__main__':
+    model = Unet(classes=2)
+    # print(model)
+    summary(model , (3,572,572))

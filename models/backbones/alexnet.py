@@ -55,5 +55,6 @@ class AlexNet(BaseModule):
 
     def forward(self, x):
         input_ = x
-
+        temp_ = self.skeleton_(input_)
+        result_ = temp_
         return result_
