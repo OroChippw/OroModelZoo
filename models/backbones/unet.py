@@ -115,9 +115,9 @@ class OutputHead(BaseModule):
         return result_
 
 # @BACKBONE.register_module(BaseModule)
-class Unet(BaseModule):
+class UNet(BaseModule):
     def __init__(self , classes):
-        super(Unet, self).__init__()
+        super(UNet, self).__init__()
         output_channels = [64,128,256,512,1024]
 
         self.encoder_0 = EncoderBlock(3 , output_channels[0])
@@ -161,6 +161,6 @@ class Unet(BaseModule):
         return result_
 
 if __name__ == '__main__':
-    model = Unet(classes=2)
+    model = UNet(classes=2)
     # print(model)
     summary(model , (3,572,572))
