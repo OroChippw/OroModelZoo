@@ -35,39 +35,63 @@ class local_feature_extractor(BaseModule):
     """
         employ channel-wise convolutions
     """
-    def __init__(self):
+    def __init__(self , in_channels , out_channels , kernel_size , stride):
         super().__init__()
+        self.ChannelWiseConv = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels , out_channels=out_channels , 
+                    kernel_size=kernel_size , stride=stride , 
+                    padding=(int(kernel_size - 1) / 2) , 
+                    groups=in_channels , bias=False)
+        )
     
     def forward(self, x):
-        return x
+        return self.ChannelWiseConv(x)
 
 class surrounding_context_extractor(BaseModule):
     """
-        employ channel-wise convolutions
+        employ channel-wise convolutions and is instantiated as 3 * 3 atrous/dilated conv
     """
-    def __init__(self):
+    def __init__(self , in_channels , out_channels , kernel_size , stride , dilation):
         super().__init__()
-    
+        self.ChannelWiseDilatedConv = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels , out_channels=out_channels , 
+                    kernel_size=kernel_size , stride=stride , 
+                    padding=int((kernel_size - 1) / 2) , groups=in_channels , 
+                    bias=False , dilation=dilation)
+        )
     def forward(self, x):
-        return x
+        return self.ChannelWiseDilatedConv(x)
 
 class joint_feature_extractor(BaseModule):
-    def __init__(self):
+    def __init__(self , out_channels):
         super().__init__()
+        self.BNPReLU = nn.Sequential(
+            nn.BatchNorm2d(out_channels * 2),
+            nn.PReLU(out_channels * 2),
+            # reduction dimension from twice out_channels to once
+            nn.Conv2d(in_channels=out_channels * 2 , out_channels=out_channels , 
+                    kernel_size=3 ,stride=1)
+        )
     
-    def forward(self, x):
-        return super().forward(x)
+    def forward(self, f_loc , f_sur):
+        input_ = torch.cat((f_loc , f_sur) , dim=1)
+        result_ = self.BNPReLU(input_)
+        return result_
 
 class global_context_extractor(BaseModule):
     '''
     Func :
         a global average pooling layer to aggregate the global context corresponding to the purple region
-
+        MLP
     '''
-    def __init__(self):
+    def __init__(self , out_channels , reduce_ratio):
         super(global_context_extractor , self).__init__()
         self.branch_ = nn.Sequential(
-
+            nn.AdaptiveAvgPool2d(1),
+            nn.Linear(out_channels , out_channels // reduce_ratio),
+            nn.ReLU(),
+            nn.Linear(out_channels // reduce_ratio , out_channels),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -86,21 +110,25 @@ class CGBlock(BaseModule):
     Args:
         BaseModule (_type_): _description_
     """
-    def __init__(self , in_channels , out_channels):
+    def __init__(self , in_channels , out_channels , dilation_rate):
         super(CGBlock , self).__init__()
         # floc(*)
-        self.flo = local_feature_extractor()
+        self.floc = local_feature_extractor(in_channels=in_channels , out_channels=out_channels , 
+                                           kernel_size=3 ,stride=1)
         # fsur(*)
-        self.fsur = surrounding_context_extractor()
+        self.fsur = surrounding_context_extractor(in_channels=in_channels , out_channels=out_channels , 
+                                            kernel_size=3 , stride=1 , dilation=dilation_rate)
         # fjoi(*)
-        self.fjoi = joint_feature_extractor()
+        self.fjoi = joint_feature_extractor(out_channels=out_channels)
         # fglo(*)
         self.fglo = global_context_extractor()
 
     def forward(self, x):
         input_ = x
-        temp_ = torch.cat(dim = 1)
-        result_ = self.fglo(temp_)
+        floc_ = self.floc(input_)
+        fsur_ = self.fsur(input_)
+        fjoi_ = self.fjoi(floc_ , fsur_)
+        result_ = self.fglo(fjoi_)
         return result_
 
 class InputInjection(BaseModule):
