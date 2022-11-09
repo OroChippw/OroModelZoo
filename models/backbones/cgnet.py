@@ -91,7 +91,7 @@ class global_context_extractor(BaseModule):
             nn.Linear(out_channels , out_channels // reduce_ratio),
             nn.ReLU(),
             nn.Linear(out_channels // reduce_ratio , out_channels),
-            nn.Sigmoid()
+            # nn.Sigmoid()
         )
 
     def forward(self, x):
