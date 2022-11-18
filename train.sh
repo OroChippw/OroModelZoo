@@ -1,6 +1,6 @@
-python train.py --save_dir E:\\OroChippwLab\\MobileNet_pytorch\\work_dirs --weights E:\\OroChippwLab\\MobileNet_pytorch\\weights\\mobilenet_v2\\mobilenet_v2-b0353104.pth
-
-
-
-
-python train.py --save_dir E:\\OroChippwLab\\MobileNet_pytorch\\work_dirs --weights E:\\OroChippwLab\\MobileNet_pytorch\\weights\\mobilenet_v2\\mobilenet_v2-b0353104.pth > train.log 2>&1
+export CUDA_VISIBLE_DEVICE=0,1
+python -m torch.distributed.launch \
+--nproc_per_node=2 \
+train_seg.py \
+--num-worker 8 \
+--des-dir \

@@ -26,42 +26,15 @@ from models import MobileNetv2
 logging.getLogger().setLevel(logging.INFO)
 
 def args_parse():
-    parse = argparse.ArgumentParser(description="Train model args")
-    parse.add_argument(
-        '--epoches' ,
-        type=int ,
-        default=20 ,
-        help='train epoches')
-    parse.add_argument(
-        '--batch_size' ,
-        type=int ,
-        default=24 ,
-        help='batch size')
-    parse.add_argument(
-        '--weights' ,
-        type=str ,
-        help='model weight path')
-    parse.add_argument(
-        '--save_dir' ,
-        type=str ,
-        help='model save path')
-    parse.add_argument(
-        '--num_worker',
-        type=int,
-        default=4,
-        help='')
-    parse.add_argument(
-        '--log_interval',
-        type=int,
-        default=5,
-        help='')
-    parse.add_argument(
-        '--save_interval',
-        type=int,
-        default=5,
-        help='')
-
-    args = parse.parse_args()
+    parser = argparse.ArgumentParser(description="Train model args")
+    parser.add_argument('--epoches',type=int,default=20,help='train epoches')
+    parser.add_argument('--batch-size' ,type=int,default=24 ,help='batch size')
+    parser.add_argument('--weights' ,type=str ,help='model weight path')
+    parser.add_argument('--save_dir' ,type=str ,help='model save path')
+    parser.add_argument('--num_worker',type=int,default=4,help='')
+    parser.add_argument('--log_interval',type=int,default=5,help='')
+    parser.add_argument('--save_interval',type=int,default=5,help='')
+    args = parser.parse_args()
     return args
 
 def main():
