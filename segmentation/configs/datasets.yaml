@@ -1,0 +1,37 @@
+MODEL:
+  backbone: UNet
+  pretrain: 
+
+LOSS:
+  type: 'BCELOSS'
+
+WORK_DIR:
+
+TRAIN:
+  batch_size:
+  start_epoches:
+  num_epoches:
+  
+  sync_bn: true
+  fp-16 : true
+
+
+
+  optimizer: 'Adam'
+
+  lr:
+  multistep_lr : true
+  lr_factor: 0.1
+  lr_step: None
+
+
+DATASET:
+  DIR_PATH:
+  TRAIN:
+
+  VAL:
+  TEST:
+  NUM_CLASSES:
+  CLASSES:
+  AUG:
+    FLIP: true
