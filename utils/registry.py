@@ -45,7 +45,8 @@ class Registry:
     """
     def __init__(self , name):
         self.name_ = name # class string name
-        self.module_dict_ = dict() # a dict , Registered modules will be stored in this dictionary type variable
+        # a dict , Registered modules will be stored in this dictionary type variable
+        self.module_dict_ = dict() 
 
     def __len__(self):
         return len(self.module_dict_)

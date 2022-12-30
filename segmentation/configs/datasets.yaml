@@ -1,5 +1,5 @@
 MODEL:
-  backbone: UNet
+  type: UNet
   pretrain: 
 
 LOSS:
@@ -28,9 +28,14 @@ TRAIN:
 DATASET:
   DIR_PATH:
   TRAIN:
+    type : 
 
   VAL:
+    type : 
+
   TEST:
+    type :
+    
   NUM_CLASSES:
   CLASSES:
   AUG:
