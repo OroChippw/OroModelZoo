@@ -1,0 +1,54 @@
+# ------------------------------- #
+# Model Settings
+MODEL:
+  type: UNet
+  pretrain:
+  dynamic: false
+
+# ------------------------------- #
+# Dataset Settings
+DATASET:
+  DIR_PATH:
+  TRAIN:
+    type:
+    image:
+    annotations:
+
+  VAL:
+    type:
+
+  TEST:
+    type:
+
+  NUM_CLASSES:
+  CLASSES:
+  AUG:
+    flip: true
+    rot_factor: 45
+    scale_factor: 0.25
+
+
+# ------------------------------- #
+# Train Hyperparameter Settings
+WORK_DIR:
+
+SNAPSHOT: 2
+
+LOSS:
+  type: 'BCELOSS'
+
+TRAIN:
+  batch_size:
+  start_epoches:
+  end_epoches:
+  world_size: 1
+  sync_bn: true
+  fp-16: true
+  optimizer: 'Adam'
+  lr: 0.001
+  multistep_lr: true
+  lr_factor: 0.1
+  lr_step:
+    - 100
+    - 200
+
