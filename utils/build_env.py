@@ -61,7 +61,11 @@ def init_dist(args):
         _init_dist_mpi(args)
     elif launcher_ == 'none' :
         args.world_size = 1
+        args.rank = 0
         args.gpu = 0
+        args.log = True
+        dist.init_process_group(backend=args.backend , init_method=args.dist_url , 
+                                    world_size=args.world_size , rank=args.rank)
         torch.cuda.set_device(args.gpu)
     else :
         raise ValueError(f"Launcher type shoud be in [/'none/', 'pytorch','slurm','mpi'] , ' \
@@ -70,9 +74,11 @@ def init_dist(args):
 
 # TODO
 def _init_dist_pytorch(args , **kwargs):
+    # print("args.rank" , args.rank)
+    # print("args.ngpus_per_node" , args.ngpus_per_node)
+    # print("args.gpu" , args.gpu)
     args.rank = args.rank * args.ngpus_per_node + args.gpu
     num_gpus = torch.cuda.device_count()
-    args.dist_url = args.address + args.port
     print(f"dist_url : {args.dist_url} , world_size : {args.world_size} , rank : {args.rank}")
     if platform.system() != 'Windows':
         dist.init_process_group(backend=args.backend , init_method=args.dist_url ,
@@ -82,6 +88,11 @@ def _init_dist_pytorch(args , **kwargs):
         dist.init_process_group(backend="gloo" , init_method="file:///sharefile" ,
                                 world_size=args.world_size , rank=args.rank)
     torch.cuda.set_device(args.gpu)
+    if args.rank % args.ngpus_per_node == 0 :
+        print("args.log")
+        args.log = True
+    else :
+        args.log = False
 
 # TODO
 def _init_dist_slurm(args , **kwargs):

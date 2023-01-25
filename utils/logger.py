@@ -9,4 +9,6 @@ def epochInfo(self , idx , loss , acc):
 def get_logger():
     logger = logging.getLogger('')
     logger.epochInfo = MethodType(epochInfo , logger)
+    logger.setLevel(logging.INFO)
+    return logger
 

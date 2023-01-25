@@ -1,5 +1,4 @@
 import os , os.path as osp
-from pathlib import Path
 
 def is_string(x):
     # whether the input is an string instance

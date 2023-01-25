@@ -1,5 +1,5 @@
 import time
-import yaml
+import logging
 import argparse
 import os , os.path as osp
 import numpy as np
@@ -16,9 +16,11 @@ from torch.utils.data import DataLoader , Dataset
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 
-from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist)
+from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , get_logger)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+NUM_GPU = torch.cuda.device_count()
+
 
 def args_parse():
     parser = argparse.ArgumentParser(description="OroModelZoo Segmentation")
@@ -32,14 +34,14 @@ def args_parse():
                         help="random seed")
     # Distributed Data Parallel settings
     parser.add_argument("--rank",type=int,default=-1,
-                            help="Node rank ofr distributed training")
-    parser.add_argument("--address",type=str,default="127.0.0.1:",
+                            help="Node rank for distributed training")
+    parser.add_argument("--address",type=str,default="tcp://127.0.0.1:",
                             help="Url used to set up distributed training")
-    parser.add_argument("--port",type=str,default="23456",
+    parser.add_argument("--port",type=str,default="12345",
                             help="Port used to set up distributed training")
     parser.add_argument("--backend", type=str, default='nccl', help="distributed backend")
     parser.add_argument("--launcher", choices=['none', 'pytorch','slurm','mpi'],
-                            default='pytorch', help='job launcher')
+                            default='none', help='job launcher')
 
     args = parser.parse_args()
     return args
@@ -53,22 +55,19 @@ def main():
             f"Config file should be a yaml , Instead of {osp.splitext(args.config)[-1]}"
     cfg_file_name = osp.basename(args.config)
     cfg = update_config(args.config)
-    print("# cfg # : " , cfg)
 
     cfg['FILE_NAME'] = cfg_file_name
     args.world_size = cfg.TRAIN.world_size
-    num_gpu = torch.cuda.device_count()
-    if args.world_size > num_gpu:
+    if args.world_size > NUM_GPU:
         print(f"The config of world_size does not match the available number of devices. "
-              f"Changing it from {args.world_size} to {num_gpu}")
-        args.world_size = num_gpu
+              f"Changing it from {args.world_size} to {NUM_GPU}")
+        args.world_size = NUM_GPU
 
     # Build WorkDir to save checkpoints and log
     if cfg.WORK_DIR is None :
-        args.work_dir = './exp/{}-{}/'.format(osp.splitext(cfg_file_name)[0] , time.strftime("%Y%m%d-%H%M"))
-    # TODO
-    # mkdir_or_exist(args.work_dir)
-    args.gpus = [i for i in range(torch.cuda.device_count())]
+        args.work_dir = './segmentation/exp/{}-{}/'.format(osp.splitext(cfg_file_name)[0] , time.strftime("%Y%m%d-%H%M"))
+    mkdir_or_exist(args.work_dir)
+    args.gpus = [i for i in range(NUM_GPU)]
     args.device = torch.device("cuda:" + str(args.gpus[0]) if args.gpus[0] >= 0 else "cpu")
 
     if not cfg.MODEL.dynamic :
@@ -95,15 +94,31 @@ def main():
 def main_worker(gpu , args , cfg):
     if gpu is not None :
         args.gpu = gpu
-
+    
+    args.dist_url = args.address + args.port
+    
     init_dist(args)
+    
+    # Init logger
+    if args.log:
+        logger = get_logger()
+        filehandler =  logging.FileHandler(
+            osp.join(args.work_dir , "training.log")
+        )   
+        streamhandler = logging.StreamHandler()
+        logger.addHandler(filehandler)
+        logger.addHandler(streamhandler)
+        
+    args.nThreads = int(args.nThreads / NUM_GPU)    
+    logger.info('*' * 64)
+    logger.info(args)
+    logger.info('*' * 64)
+    logger.info(cfg)
+    logger.info('*' * 64)
+    
     exit(0)
-
-
-    # init logger
-    timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
-    log_file = osp.join(args.work_dir, f'{timestamp}.log')
-
+    
+    # build loss function
 
     # build datasets
 
@@ -152,8 +167,8 @@ def main_worker(gpu , args , cfg):
     if distributed_:
         torch.nn.SyncBatchNorm.convert_sync_batchnorm(model_)
 
-    # loss function
-    criterion_ = nn.CrossEntropyLoss()
+    
+   
     # optimizer
     if args.TRAIN.optimizer == 'Adam':
         optimizer_ = optim.Adam(model_.parameters(), lr=args.TRAIN.LR)
