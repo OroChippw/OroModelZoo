@@ -158,13 +158,15 @@ def main_worker(gpu , args , cfg):
                                                        gamma=cfg.TRAIN.lr_factor)
     
     # Initialize dataset
-    
+    train_dataset = builder.build_dataset(cfg.DATASET.TRAIN , preset_cfg=cfg.DATA_PRESET , train_mode=True)
+    valid_dataset = builder.build_dataset(cfg.DATASET.VAL , preset_cfg=cfg.DATA_PRESET , train_mode = False)
     # SyncBN is not support in DP mode
-    if distributed_:
-        train_sampler = DistributedSampler(dataset="", shuffle=True)
-        val_sampler = DistributedSampler(dataset="", shuffle=False)
-    else:
-        train_dataloader = DataLoader("", batch_size=args.batch_size)
+    # TODO
+    train_sampler = DistributedSampler(dataset=train_dataset, num_replicas=args.world_size , rank=args.rank)
+    val_sampler = DistributedSampler(dataset=valid_dataset, num_replicas=args.world_size , rank=args.rank)
+    
+    train_dataloader = DataLoader(dataset=train_dataset, batch_size=cfg.TRAIN.batch_size , 
+                                    shuffle=(train_sampler is None) , num_workers=args.nThreads , sampler=train_sampler)
     
     exit(0)
     
