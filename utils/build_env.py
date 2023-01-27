@@ -55,6 +55,7 @@ def init_dist(args):
     launcher_ = args.launcher
     if launcher_ == 'pytorch':
         _init_dist_pytorch(args)
+        return True
     elif launcher_ == 'slurm' :
         _init_dist_slurm(args)
     elif launcher_ == 'mpi' :
@@ -67,6 +68,7 @@ def init_dist(args):
         dist.init_process_group(backend=args.backend , init_method=args.dist_url , 
                                     world_size=args.world_size , rank=args.rank)
         torch.cuda.set_device(args.gpu)
+        return False
     else :
         raise ValueError(f"Launcher type shoud be in [/'none/', 'pytorch','slurm','mpi'] , ' \
                             'Unsupport launcher type : {launcher_}")

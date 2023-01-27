@@ -16,7 +16,9 @@ from torch.utils.data import DataLoader , Dataset
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 
-from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , get_logger)
+from .utils import builder
+from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , 
+                   get_logger , weights_init)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 NUM_GPU = torch.cuda.device_count()
@@ -97,7 +99,7 @@ def main_worker(gpu , args , cfg):
     
     args.dist_url = args.address + args.port
     
-    init_dist(args)
+    distributed_ = init_dist(args)
     
     # Init logger
     if args.log:
@@ -116,18 +118,58 @@ def main_worker(gpu , args , cfg):
     logger.info(cfg)
     logger.info('*' * 64)
     
-    exit(0)
+    # Initialize Model
+    model_ = builder.build_model(cfg.MODEL , preset_cfg=cfg.DATA_PRESET)
+    if cfg.MODEL.pretrained:
+        pretrained_path = cfg.MODEL.pretrained
+        logger.info(f"Loading model from {pretrained_path}")
+        model_.load_state_dict(torch.load(pretrained_path))
+    elif cfg.MODEL.try_load:
+        try_load_path = cfg.MODEL.try_load
+        logger.info(f"Loading model from {try_load_path}")
+        load_state = torch.load(try_load_path)
+        model_state = model_.state_dict()
+        load_state = {k : v for k , v in load_state.items()
+                        if k in model_state and v.size() == model_state[k].size()}
+        model_state.update(load_state)
+        model_.load_state_dict(model_state)
+    else :
+        logger.info("Initial a new model without pretrained weights and try_load weights")
+        logger.info("==> Initialize weights...")
+        # TODO : 
+        weights_init(model_ , init_type='xavier' , init_gain=0.01)
+        
+    model_.cuda(args.gpu)
+    model_ = DistributedDataParallel(model_ , device_ids=[args.gpu])
+        
+    # Initialize criterion
+    criterion_ = builder.build_loss(cfg.LOSS).cuda()
     
-    # build loss function
-
-    # build datasets
-
+    # Initialize optimizer
+    if cfg.TRAIN.optimizer == 'Adam':
+        optimizer_ = optim.Adam(model_.parameters(), lr=cfg.TRAIN.lr)
+    elif cfg.TRAIN.optimizer == 'SGD':
+        momentum_ = cfg.TRAIN.momentum if cfg.TRAIN.momentum is not None else 0.9
+        weight_decay_ = cfg.TRAIN.weight_decay if cfg.TRAIN.weight_decay is not None else 0.0001
+        optimizer_ = optim.SGD(model_.parameters(), lr=cfg.TRAIN.lr, momentum=momentum_, 
+                                weight_decay=weight_decay_)
+    if cfg.TRAIN.multistep_lr:
+        lr_scheduler_ = optim.lr_scheduler.MultiStepLR(optimizer=optimizer_, milestones=args.TRAIN.lr_step,
+                                                       gamma=cfg.TRAIN.lr_factor)
+    
+    # Initialize dataset
+    
     # SyncBN is not support in DP mode
     if distributed_:
         train_sampler = DistributedSampler(dataset="", shuffle=True)
         val_sampler = DistributedSampler(dataset="", shuffle=False)
+    else:
+        train_dataloader = DataLoader("", batch_size=args.batch_size)
+    
+    exit(0)
+    
 
-    train_dataloader = DataLoader("", batch_size=args.batch_size)
+    
 
     # Init Automatic mixed precision GradScaler
     if args.fp16:
@@ -169,14 +211,7 @@ def main_worker(gpu , args , cfg):
 
     
    
-    # optimizer
-    if args.TRAIN.optimizer == 'Adam':
-        optimizer_ = optim.Adam(model_.parameters(), lr=args.TRAIN.LR)
-    elif args.TRAIN.optimizer == 'SGD':
-        optimizer_ = optim.SGD(model_.parameters(), lr=args.TRAIN.LR, momentum=0.9, weight_decay=0.0001)
-    if args.TRAIN.multistep_lr:
-        lr_scheduler_ = optim.lr_scheduler.MultiStepLR(optimizer=optimizer_, milestones=args.TRAIN.LR_STEP,
-                                                       gamma=args.TRAIN.LR_FACTOR)
+
 
     metric_ = None
 
