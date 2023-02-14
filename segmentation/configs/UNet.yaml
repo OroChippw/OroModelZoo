@@ -9,17 +9,23 @@ MODEL:
 # ------------------------------- #
 # Dataset Settings
 DATASET:
-  DIR_PATH: ''
+  DIR_PATH: '/root/OroChiLab/Datasets/VOC2012'
   TRAIN:
     type: ''
-    image: ''
+    image_prefix: ''
     annotations: ''
 
   VAL:
     type: ''
+    image_prefix: ''
+    annotations: ''
+
 
   TEST:
     type: ''
+    image_prefix: ''
+    annotations: ''
+
 
   NUM_CLASSES: ''
   CLASSES: ''

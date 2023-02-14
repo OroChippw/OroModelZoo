@@ -7,7 +7,6 @@ from tqdm import tqdm
 from easydict import EasyDict as edict
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torch.distributed as dist
 import torch.multiprocessing as mp
@@ -16,9 +15,9 @@ from torch.utils.data import DataLoader , Dataset
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 
-from .utils import builder
+from utils import builder
 from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , 
-                   get_logger , weights_init)
+                   get_logger , weights_init , get_dist_info)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 NUM_GPU = torch.cuda.device_count()
@@ -68,6 +67,8 @@ def main():
     # Build WorkDir to save checkpoints and log
     if cfg.WORK_DIR is None :
         args.work_dir = './segmentation/exp/{}-{}/'.format(osp.splitext(cfg_file_name)[0] , time.strftime("%Y%m%d-%H%M"))
+    else :
+        args.work_dir = cfg.WORK_DIR
     mkdir_or_exist(args.work_dir)
     args.gpus = [i for i in range(NUM_GPU)]
     args.device = torch.device("cuda:" + str(args.gpus[0]) if args.gpus[0] >= 0 else "cpu")
@@ -87,13 +88,18 @@ def main():
     else :
         ngpus_per_node = torch.cuda.device_count()
         args.ngpus_per_node = ngpus_per_node
-        # The first parameter of mp.spawn is a function, this function will execute all the steps of training, python will create multiple processes, each process will execute the main_worker function.
-        # The second parameter is the number of processes to open.
-        # The third parameter is the function argument of main_worker
+        '''
+            The first parameter of mp.spawn is a function, this function will execute all the steps of training, python will create multiple processes, each process will execute the main_worker function.
+            The second parameter is the number of processes to open.
+            The third parameter is the function argument of main_worker
+        '''
         mp.spawn(main_worker , nprocs = ngpus_per_node , args=(args , cfg))
 
 
 def main_worker(gpu , args , cfg):
+    rank_ , world_size_ = get_dist_info()
+    print("rank_ : " , rank_)
+    
     if gpu is not None :
         args.gpu = gpu
     
@@ -168,6 +174,38 @@ def main_worker(gpu , args , cfg):
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=cfg.TRAIN.batch_size , 
                                     shuffle=(train_sampler is None) , num_workers=args.nThreads , sampler=train_sampler)
     
+    # Initialize error
+    error_ = float('inf')
+    
+    # Start journey
+    for i in range(cfg.TRAIN.start_epoches , cfg.TRAIN.end_epoches):
+        epoch_ = i
+        train_sampler.set_epoch(epoch_)
+        '''
+            The value of the model parameters stored by the optimizer is just a reference, so it is not necessary to move the optimizer to cuda. 
+            When the model is moved to CUDA, the parameter page in the optimizer is moved to CUDA.
+        '''
+        current_lr_ = optimizer_.state_dict()['param_groups'][0]['lr']
+        
+        logger.info(f"########## Starting Epoch {epoch_} | Learning Rate : {current_lr_} ##########")
+
+        # Training
+        if rank_ == 0:
+            train_loader = tqdm(train_dataloader , dynamic_ncols=True)
+        
+        for i , (img , label) in enumerate(train_loader):
+            image = img.cuda()
+            annotation = label
+            
+            output = model_(image , annotation)
+            # Calculate loss
+            loss_ = criterion_(output , annotation)
+            # zero_grad and backward
+            optimizer_.zero_grad()
+            loss_.backward()
+            optimizer_.step()
+            
+            
     exit(0)
     
 
