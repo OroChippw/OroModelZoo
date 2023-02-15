@@ -148,6 +148,7 @@ def build_from_cfg(cfg, registry, default_args=None):
                         f'but got {type(default_args)}')
 
     args = cfg.copy()
+    print("args : " , args)
 
     if default_args is not None:
         for name, value in default_args.items():
@@ -166,36 +167,3 @@ def build_from_cfg(cfg, registry, default_args=None):
             f'type must be a str or valid type, but got {type(obj_type)}')
 
     return obj_cls(**args)
-
-def retrieve_from_cfg(cfg , registry):
-    """
-    Func:
-        Retrieve a module class frtom config dict
-    Args:
-        cfg(dict): Config dict. It should at least contain the key value
-        registry(obj:Registry): The registery to search the type from
-    Returns:
-        class: The class
-    """
-    if 'type' not in cfg:
-        raise KeyError(f'`cfg` must contain the key `type`')
-    cfg_ = cfg.copy()
-    obj_type = cfg_.pop('type')
-    
-    if isinstance(obj_type , str):
-        obj_cls = registry.get(obj_type)
-        if obj_cls is None :
-            raise KeyError(
-                f'{obj_type} is not in the {registry.name} registry')
-    elif inspect.isclass(obj_type):
-        obj_cls = obj_type
-    else :
-        raise TypeError(
-            f'`obj_type` must be a str or valid type , but got {type(obj_type)}'
-        )
-    
-    return obj_cls
-    
-    
-    
-    

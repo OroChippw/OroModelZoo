@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader , Dataset
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 
-from utils import builder
+from segmentation import builder
 from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , 
                    get_logger , weights_init , get_dist_info)
 
@@ -98,7 +98,7 @@ def main():
 
 def main_worker(gpu , args , cfg):
     rank_ , world_size_ = get_dist_info()
-    print("rank_ : " , rank_)
+    # print("rank_ : " , rank_)
     
     if gpu is not None :
         args.gpu = gpu
@@ -118,11 +118,11 @@ def main_worker(gpu , args , cfg):
         logger.addHandler(streamhandler)
         
     args.nThreads = int(args.nThreads / NUM_GPU)    
-    logger.info('*' * 64)
-    logger.info(args)
-    logger.info('*' * 64)
-    logger.info(cfg)
-    logger.info('*' * 64)
+    # logger.info('*' * 64)
+    # logger.info(args)
+    # logger.info('*' * 64)
+    # logger.info(cfg)
+    # logger.info('*' * 64)
     
     # Initialize Model
     model_ = builder.build_model(cfg.MODEL , preset_cfg=cfg.DATA_PRESET)

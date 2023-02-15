@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchsummary import summary
-# from ..base_module import BaseModule
-# from ..builder import BACKBONE
+from ..builder import MODELS
 
 class BaseModule(nn.Module):
     def __init__(self):
@@ -114,7 +112,7 @@ class OutputHead(BaseModule):
         result_ = torch.sigmoid(temp_)
         return result_
 
-# @BACKBONE.register_module(BaseModule)
+@MODELS.register_module()
 class UNet(BaseModule):
     def __init__(self , classes):
         super(UNet, self).__init__()
@@ -163,4 +161,4 @@ class UNet(BaseModule):
 if __name__ == '__main__':
     model = UNet(classes=2)
     # print(model)
-    summary(model , (3,572,572))
+    # summary(model , (3,572,572))
