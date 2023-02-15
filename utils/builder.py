@@ -5,6 +5,7 @@ from .registry import Registry , retrieve_from_cfg , build_from_cfg
 MODELS = Registry("models")
 LOSS = Registry("loss")
 DATASETS = Registry("datasets")
+TRANSFORMS = Registry("transforms")
 
 def build(cfg , registry , default_args = None):
     if isinstance(cfg , list):

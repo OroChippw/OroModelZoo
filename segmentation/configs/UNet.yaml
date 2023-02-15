@@ -27,7 +27,7 @@ DATASET:
     annotations: ''
 
 
-  NUM_CLASSES: ''
+  NUM_CLASSES: 2
   CLASSES: ''
   AUG:
     flip: true
