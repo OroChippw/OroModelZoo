@@ -6,13 +6,13 @@ from ..transforms import Compose
 
 @DATASETS.register_module()
 class PPHumanSeg14K(BaseDataset):
-    def __init__(self , dataset_root , transforms , mode):
+    def __init__(self , dataset_root , transforms , mode , 
+                 train_path=None , val_path=None , test_path=None):
         self.dataset_root = dataset_root
         self.transforms = Compose(transforms)
         self.mode = mode.lower()
         self.num_classes = 2
         self.file_list = list()
-        
         
         if self.mode not in ['train' , 'val' , 'test']:
             raise ValueError(f'mode should be `train , `val` , `test` , but got {self.mode}')

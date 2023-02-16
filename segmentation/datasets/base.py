@@ -64,7 +64,7 @@ class BaseDataset(Dataset):
             else :
                 file_path = test_path
         
-        with open(file_path , 'r') as f:
+        with open(osp.abspath(file_path) , 'r') as f:
             for line_ in f:
                 item_ = line_.strip().split(' ')
                 if len(item_) != 2:

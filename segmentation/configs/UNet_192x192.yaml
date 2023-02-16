@@ -3,7 +3,6 @@
 MODEL:
   type: UNet
   # pretrained: 'segmentation/weights/unet_carvana_scale1.0_epoch2.pth'
-  # try_load: ''
   pretrained: ''
   try_load: ''
   dynamic: false
@@ -11,26 +10,32 @@ MODEL:
 # ------------------------------- #
 # Dataset Settings
 DATASET:
-  DIR_PATH: '/root/OroChiLab/Datasets/VOC2012'
   TRAIN:
     type: 'PPHumanSeg14K'
-    image_prefix: ''
-    annotations: ''
+    dataset_root: '/root/OroChiLab/Datasets/PP-HumanSeg14K'
+    train_path: 'train.txt'
     aug:
-      flip: true
-      rot_factor: 45
-      scale_factor: 0.25
+      - type: Resize
+        size: [192,192]
+      - type: Flip
+      - type: Rotation
+        rot_factor: 45
 
   VAL:
     type: 'PPHumanSeg14K'
-    image_prefix: ''
-    annotations: ''
-
+    dataset_root: '/root/OroChiLab/Datasets/PP-HumanSeg14K'
+    val_path: 'val.txt'
+    aug:
+      - type: Resize
+        size: [192,192]
 
   TEST:
     type: 'PPHumanSeg14K'
-    image_prefix: ''
-    annotations: ''
+    dataset_root: '/root/OroChiLab/Datasets/PP-HumanSeg14K'
+    test_path: 'test.txt'
+    aug:
+      - type: Resize
+        size: [192,192]
 
 
   NUM_CLASSES: 2
