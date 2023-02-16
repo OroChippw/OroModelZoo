@@ -114,8 +114,9 @@ class OutputHead(BaseModule):
 
 @MODELS.register_module()
 class UNet(BaseModule):
-    def __init__(self , classes):
+    def __init__(self , classes=2 , pretrained=None , **cfg):
         super(UNet, self).__init__()
+        self.pretrained = pretrained
         output_channels = [64,128,256,512,1024]
 
         self.encoder_0 = EncoderBlock(3 , output_channels[0])
@@ -157,6 +158,7 @@ class UNet(BaseModule):
         result_ = self.head_(upsample_0)
 
         return result_
+
 
 if __name__ == '__main__':
     model = UNet(classes=2)

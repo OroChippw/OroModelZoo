@@ -2,6 +2,8 @@
 # Model Settings
 MODEL:
   type: UNet
+  # pretrained: 'segmentation/weights/unet_carvana_scale1.0_epoch2.pth'
+  # try_load: ''
   pretrained: ''
   try_load: ''
   dynamic: false
@@ -11,18 +13,22 @@ MODEL:
 DATASET:
   DIR_PATH: '/root/OroChiLab/Datasets/VOC2012'
   TRAIN:
-    type: ''
+    type: 'PPHumanSeg14K'
     image_prefix: ''
     annotations: ''
+    aug:
+      flip: true
+      rot_factor: 45
+      scale_factor: 0.25
 
   VAL:
-    type: ''
+    type: 'PPHumanSeg14K'
     image_prefix: ''
     annotations: ''
 
 
   TEST:
-    type: ''
+    type: 'PPHumanSeg14K'
     image_prefix: ''
     annotations: ''
 
@@ -36,8 +42,8 @@ DATASET:
 
 DATA_PRESET:
   image_size:
-    -256
-    -256
+    - 256
+    - 256
 
 # ------------------------------- #
 # Train Hyperparameter Settings
@@ -46,7 +52,7 @@ WORK_DIR: ''
 SNAPSHOT: 2
 
 LOSS:
-  type: 'BCELOSS'
+  type: 'BCELoss'
 
 TRAIN:
   batch_size: 128

@@ -1,6 +1,8 @@
 import os.path as osp
 
 from .base import BaseDataset
+from ..builder import DATASETS
+from ..transforms import Compose
 
 @DATASETS.register_module()
 class PPHumanSeg14K(BaseDataset):
@@ -12,7 +14,7 @@ class PPHumanSeg14K(BaseDataset):
         self.file_list = list()
         
         
-        if self.mode is not in ['train' , 'val' , 'test']:
+        if self.mode not in ['train' , 'val' , 'test']:
             raise ValueError(f'mode should be `train , `val` , `test` , but got {self.mode}')
         if self.mode == 'train':
             file_path = osp.join(self.dataset_root , 'train.txt')

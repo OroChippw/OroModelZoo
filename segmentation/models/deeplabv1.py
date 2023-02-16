@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
-from ..base_module import BaseModule
-from ..builder import BACKBONE
+from .base_module import BaseModule
+from ..builder import MODELS
 
 
 class DeepLabV1(BaseModule):

@@ -3,7 +3,7 @@ from .mkdir import mkdir_or_exist
 from .dist_utils import  get_dist_info
 from .logger import get_logger
 from .build_env import build_multi_process , setup_seed , init_dist
-from .weights_init import weights_init
+from .weightsinit import weights_init
 from .config import update_config
 
 

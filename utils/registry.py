@@ -156,6 +156,7 @@ def build_from_cfg(cfg, registry, default_args=None):
     obj_type = args.pop('type')
     if isinstance(obj_type , str):
         obj_cls = registry.get(obj_type)
+        print(f"obj_cls : {obj_cls} , obj_type : {obj_type}")
         if obj_cls is None:
             raise KeyError(
                 f'{obj_type} is not in the {registry.name} registry')
@@ -164,7 +165,7 @@ def build_from_cfg(cfg, registry, default_args=None):
     else:
         raise TypeError(
             f'type must be a str or valid type, but got {type(obj_type)}')
-
+    print("args : " , args)
     return obj_cls(**args)
 
 def retrieve_from_cfg(cfg , registry):

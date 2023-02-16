@@ -16,11 +16,16 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 
 from segmentation import builder
-from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist , 
+from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist,
                    get_logger , weights_init , get_dist_info)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 NUM_GPU = torch.cuda.device_count()
+
+#---------------------------temp------------------------------ #
+
+
+#---------------------------temp------------------------------ #
 
 
 def args_parse():
@@ -98,8 +103,6 @@ def main():
 
 def main_worker(gpu , args , cfg):
     rank_ , world_size_ = get_dist_info()
-    # print("rank_ : " , rank_)
-    
     if gpu is not None :
         args.gpu = gpu
     
@@ -108,7 +111,7 @@ def main_worker(gpu , args , cfg):
     distributed_ = init_dist(args)
     
     # Init logger
-    if args.log:
+    if rank_ == 0:
         logger = get_logger()
         filehandler =  logging.FileHandler(
             osp.join(args.work_dir , "training.log")
@@ -118,21 +121,26 @@ def main_worker(gpu , args , cfg):
         logger.addHandler(streamhandler)
         
     args.nThreads = int(args.nThreads / NUM_GPU)    
-    # logger.info('*' * 64)
-    # logger.info(args)
-    # logger.info('*' * 64)
-    # logger.info(cfg)
-    # logger.info('*' * 64)
+    logger.info('*' * 64)
+    logger.info(args)
+    logger.info('*' * 64)
+    logger.info(cfg)
+    logger.info('*' * 64)
     
     # Initialize Model
     model_ = builder.build_model(cfg.MODEL , preset_cfg=cfg.DATA_PRESET)
     if cfg.MODEL.pretrained:
         pretrained_path = cfg.MODEL.pretrained
-        logger.info(f"Loading model from {pretrained_path}")
-        model_.load_state_dict(torch.load(pretrained_path))
+        logger.info(f"Loading model from pretrained {pretrained_path}")
+        load_state = torch.load(pretrained_path)
+        model_state = model_.state_dict()
+        load_state = {k : v for k , v in load_state.items()
+                        if k in model_state and v.size() == model_state[k].size()}
+        model_state.update(load_state)
+        model_.load_state_dict(model_state)
     elif cfg.MODEL.try_load:
         try_load_path = cfg.MODEL.try_load
-        logger.info(f"Loading model from {try_load_path}")
+        logger.info(f"Loading model from try load path {try_load_path}")
         load_state = torch.load(try_load_path)
         model_state = model_.state_dict()
         load_state = {k : v for k , v in load_state.items()
@@ -142,8 +150,8 @@ def main_worker(gpu , args , cfg):
     else :
         logger.info("Initial a new model without pretrained weights and try_load weights")
         logger.info("==> Initialize weights...")
-        # TODO : 
-        weights_init(model_ , init_type='xavier' , init_gain=0.01)
+        weights_init(model_ , init_type='normal' , init_gain=0.02)
+    
         
     model_.cuda(args.gpu)
     model_ = DistributedDataParallel(model_ , device_ids=[args.gpu])
@@ -160,22 +168,21 @@ def main_worker(gpu , args , cfg):
         optimizer_ = optim.SGD(model_.parameters(), lr=cfg.TRAIN.lr, momentum=momentum_, 
                                 weight_decay=weight_decay_)
     if cfg.TRAIN.multistep_lr:
-        lr_scheduler_ = optim.lr_scheduler.MultiStepLR(optimizer=optimizer_, milestones=args.TRAIN.lr_step,
+        lr_scheduler_ = optim.lr_scheduler.MultiStepLR(optimizer=optimizer_, milestones=cfg.TRAIN.lr_step,
                                                        gamma=cfg.TRAIN.lr_factor)
-    
+
     # Initialize dataset
     train_dataset = builder.build_dataset(cfg.DATASET.TRAIN , preset_cfg=cfg.DATA_PRESET , train_mode=True)
     valid_dataset = builder.build_dataset(cfg.DATASET.VAL , preset_cfg=cfg.DATA_PRESET , train_mode = False)
     # SyncBN is not support in DP mode
-    # TODO
     train_sampler = DistributedSampler(dataset=train_dataset, num_replicas=args.world_size , rank=args.rank)
     val_sampler = DistributedSampler(dataset=valid_dataset, num_replicas=args.world_size , rank=args.rank)
     
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=cfg.TRAIN.batch_size , 
                                     shuffle=(train_sampler is None) , num_workers=args.nThreads , sampler=train_sampler)
-    
     # Initialize error
     error_ = float('inf')
+    exit(0)
     
     # Start journey
     for i in range(cfg.TRAIN.start_epoches , cfg.TRAIN.end_epoches):

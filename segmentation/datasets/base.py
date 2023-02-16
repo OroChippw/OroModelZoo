@@ -4,8 +4,8 @@ import os.path as osp
 import torch
 from torch.utils.data import Dataset
 
-from utils.builder import DATASETS
-from .transforms import Compose
+from ..builder import DATASETS
+from ..transforms import Compose
 
 @DATASETS.register_module()
 class BaseDataset(Dataset):
@@ -36,17 +36,17 @@ class BaseDataset(Dataset):
         
         if not osp.exists(self.dataset_root):
             raise FileNotFoundError(f'{self.dataset_root} is not exists')
-        if img_channels not in [1,3],
+        if img_channels not in [1,3]:
             raise ValueError(f'`img_channels` should in [1,3] , but got {self.img_channels}')
         if self.num_classes < 1:
             raise ValueError(f'num_classes should at least 1 , but got {self.num_classes}')
-        if self.mode is not in ['train' , 'val' , 'test']:
+        if self.mode not in ['train' , 'val' , 'test']:
             raise ValueError(f'mode should be `train , `val` , `test` , but got {self.mode}')
         if self.mode == 'train':
             if train_path is None:
                 raise ValueError('When mode is `train`,train_path is necessary,but got None')
             elif not osp.exist(train_path):
-                raise FileNotFoundError(f'{tran_path} is not exist')
+                raise FileNotFoundError(f'{train_path} is not exist')
             else :
                 file_path = train_path
         elif self.mode == 'val':
@@ -70,11 +70,11 @@ class BaseDataset(Dataset):
                 if len(item_) != 2:
                     if self.mode in ['train' , 'val']:
                         raise ValueError('File list format incorrect')
-                    if not osp.isabs(item_[0])
+                    if not osp.isabs(item_[0]):
                         image_path = osp.join(self.dataset_root , item_[0])
                         label_path = None
                 else :
-                    if not osp.isabs(item_[0])
+                    if not osp.isabs(item_[0]):
                         image_path = osp.join(self.dataset_root , item_[0])
                         label_path = osp.join(self.dataset_root , item_[1])
                     else:
