@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image , ImageEnhance
 
 def _cal_rescale_size(image_size , target_size):
     '''
@@ -44,3 +45,30 @@ def _normalize(image , mean , std):
     image -= mean
     image /= std
     return image
+
+def _brightness(im, brightness_lower, brightness_upper):
+    brightness_delta = np.random.uniform(brightness_lower, brightness_upper)
+    im = ImageEnhance.Brightness(im).enhance(brightness_delta)
+    return im
+
+def _contrast(im, contrast_lower, contrast_upper):
+    contrast_delta = np.random.uniform(contrast_lower, contrast_upper)
+    im = ImageEnhance.Contrast(im).enhance(contrast_delta)
+    return im
+
+def _saturation(im, saturation_lower, saturation_upper):
+    saturation_delta = np.random.uniform(saturation_lower, saturation_upper)
+    im = ImageEnhance.Color(im).enhance(saturation_delta)
+    return im
+
+def _hue(im, hue_lower, hue_upper):
+    hue_delta = np.random.uniform(hue_lower, hue_upper)
+    im = np.array(im.convert('HSV'))
+    im[:, :, 0] = im[:, :, 0] + hue_delta
+    im = Image.fromarray(im, mode='HSV').convert('RGB')
+    return im
+
+def _sharpness(im, sharpness_lower, sharpness_upper):
+    sharpness_delta = np.random.uniform(sharpness_lower, sharpness_upper)
+    im = ImageEnhance.Sharpness(im).enhance(sharpness_delta)
+    return im
