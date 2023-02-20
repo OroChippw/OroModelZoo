@@ -1,7 +1,8 @@
 # OroModelZoo
 
 ## Introduction
-  OroModelZoo is a PyTorch-based open source toolbox for deep learning network reproduction involving classification, segmentation, and detection of computer vision directions.At present, it is mainly used for personal study and experiment of OroChi Fang.Welcome everyone to submit and provide constructive suggestions for network reproduction, thank you🤞
+  OroModelZoo is a PyTorch-based open source toolbox for deep learning network reproduction involving classification, segmentation, and detection of computer vision directions.  
+  At present, it is mainly used for personal study and experiment of OroChi Fang.Welcome everyone to submit and provide constructive suggestions for network reproduction, thank you🤞
 ## Top News
 **`2023-02`**:  
 **`2022-10`**: **Create repository for OroModelZoo🎂**
