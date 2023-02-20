@@ -28,6 +28,8 @@
 - [x] ShuffleNetV2
 ### Segmentation
 - [x] UNet
++ One of the earlier algorithms for semantic segmentation tasks using multi-scale features
++ The fully convolutional neural network (FCN) is introduced to solve the problem that CNN cannot perform pixel-level fine segmentation
 
 - [x] CGNet
 
@@ -41,6 +43,13 @@
 - [] DeepLab V3+
 - [] HRNet 
 ### Detection
+- [] Fast R-CNN
+- [] Faster R-CNN
+- [] YOLOv3
+- [] YOLOv5
+- [] YOLOX
+
+
 ### Classfication
 
 
