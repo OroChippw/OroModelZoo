@@ -9,11 +9,14 @@
 
 ## Supported model and backbone
 ### backbone
-- [x] MobileNetv1  
-  - Depthwise Separable Convolution  
-  - 局限：没有残差连接、很多Depthwise卷积核训练出来是0，因为卷积核权重数量太少，同时ReLU清零，低精度的浮点数  
-- [x] MobileNetv2  
-  - Linear Bottleneck ; Inverted Residual  
+- [x] MobileNetv1
++ MobileNet is a lightweight deep nerural network proposed by Google for embedded devices such as mobile phones  
++ Proposed Depthwise Separable Convolution  
++ Limitation:没有残差连接、很多Depthwise卷积核训练出来是0，因为卷积核权重数量太少，同时ReLU清零，低精度的浮点数  
+- [x] MobileNetv2
++ Inverted Residual Block
++ Linear Bottleneck
++ Limitation: 
 - [x] MobileNetv3  
     1.更新了Block提出bneck  
     2.加入SE注意力机制，更新激活函数，  
@@ -29,19 +32,23 @@
 - [x] ShuffleNetV2
 ### Segmentation
 - [x] UNet
-+ One of the earlier algorithms for semantic segmentation tasks using multi-scale features
-+ The fully convolutional neural network (FCN) is introduced to solve the problem that CNN cannot perform pixel-level fine segmentation
++ One of the earlier algorithms for semantic segmentation tasks using multi-scale features(较早使用多尺度特征进行语义分割任务的算法之一)
++ The fully convolutional neural network (FCN) is introduced to solve the problem that CNN cannot perform pixel-level fine segmentation(引入全卷积神经网络（FCN），解决CNN无法进行像素级精细分割的问题)
 
 - [x] CGNet
 
-- [] DeepLab V1
+- [] DeepLabV1
   Low-level vision task
-  1、Atrous Convolution , also named dilated convolution
-  2、Fully-connected Conditional Random Field , CRF
++ Proposed Atrous Convolution , also named dilated convolution
++ Fully-connected Conditional Random Field , CRF
 
-- [] DeepLab V2
-- [] DeepLab V3
-- [] DeepLab V3+
+- [] DeepLabV2
++ Proposed Atrous Spatial Pyramid Pooling(ASPP) , which can be used to solve the problem of different detection target size differences by using dilated convolution with different dialation rate
++ Replace VGG used in DeepLabv1 with a deeper ResNet
+- [] DeepLabV3
+- [] DeepLabV3+
++ 
++ 
 - [] HRNet 
 ### Detection
 - [] Fast R-CNN
@@ -53,6 +60,10 @@
 
 ### Classfication
 
+## Support Loss
+- [x] BCELoss
+- [x] FocalLoss
+- [x] DiceLoss
 
 ## Requirements
 pytorch >= 1.9.0

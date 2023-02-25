@@ -7,7 +7,7 @@ from ..builder import MODELS
 
 
 class DeepLabV1(BaseModule):
-    def __init__(self , n_classes):
+    def __init__(self , num_classes):
         super().__init__()
         self.skeleton_ = nn.Sequential(
             # VGG16 Block1
@@ -86,11 +86,11 @@ class DeepLabV1(BaseModule):
             nn.Dropout2d(p=0.5),
 
             # Last Convolution
-            nn.Conv2d(in_channels=1024 , out_channels=n_classes , kernel_size=1 , 
+            nn.Conv2d(in_channels=1024 , out_channels=num_classes , kernel_size=1 , 
                         stride=1)
         )
 
-        self.num_classes = n_classes
+        self.num_classes = num_classes
 
     def forward(self, x):
         input_ = x

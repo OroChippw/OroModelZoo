@@ -1,8 +1,8 @@
 import math
 import torch.nn as nn
-from ..base_module import BaseModule
-from ..utils import InvertedresBlock
-from ..builder import BACKBONE
+from .base_module import BaseModule
+from .utils import InvertedresBlock
+from ..builder import MODELS
 
 def _make_divisible(channels, divisor, min_channels=None):
     '''
@@ -19,7 +19,7 @@ def _make_divisible(channels, divisor, min_channels=None):
     return new_channels
 
 
-# BaseConv or # Depthwise Separable Convolution，DSC
+# BaseConv or Depthwise Separable Convolution，DSC
 class Conv(BaseModule):
     def __init__(self, in_channels, out_channels, kernel_size=3,
                  stride: int = 1, padding: int = 1, groups: int = 1):
@@ -37,15 +37,14 @@ class Conv(BaseModule):
         result_ = self.Conv2d(x)
         return result_
 
-@BACKBONE.register_module()
+@MODELS.register_module()
 class MobileNetv2(BaseModule):
-    def __init__(self, widen_factor: float = 1.0, num_classes: int = 1000, pretrained=None):
+    def __init__(self, widen_factor: float = 1.0, num_classes: int = 1000, pretrained=False):
         super(MobileNetv2, self).__init__()
         self.pretrained = pretrained
 
         # setting of inverted residual blocks
         # t (expand_ratio), c (output_channels), n (block replace num), s (first block stride)
-        #
         self.cfgs = [
             [1, 16, 1, 1],
             [6, 24, 2, 2],

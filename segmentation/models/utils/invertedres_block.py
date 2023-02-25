@@ -33,12 +33,11 @@ class InvertedresBlock(BaseModule):
     '''
     def __init__(self , in_channels , out_channels , stride , expand_ratio):
         super(InvertedresBlock, self).__init__()
-
+        assert stride in [1, 2], f'stride must in [1, 2]. ' \
+            f'But got {stride}.'
         hidden_channel = round(in_channels * expand_ratio)
         self.use_shortcut = (stride == 1) and (in_channels == out_channels)
-        assert stride in [1, 2], f'stride must in [1, 2]. ' \
-            f'But received {stride}.'
-
+        
         layers = []
         if expand_ratio != 1 : 
             # Ascension

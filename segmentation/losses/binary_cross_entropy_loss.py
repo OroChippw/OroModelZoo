@@ -12,11 +12,11 @@ class BCELoss(nn.Module):
         self.reduction = reduction
         self.use_sigmoid = use_sigmoid
         
-    def forward(self , output , label):
-        if len(output.shape) != len(label.shape):
-            label = torch.unsqueeze(label , 1)
+    def forward(self , predict , target):
+        if len(predict.shape) != len(target.shape):
+            label = torch.unsqueeze(target , 1)
         if self.use_sigmoid:
-            loss_ = F.binary_cross_entropy_with_logits(output , label.float())
+            loss_ = F.binary_cross_entropy_with_logits(predict , target.float())
         else:
-            loss_ = F.binary_cross_entropy(output , label.float())
+            loss_ = F.binary_cross_entropy(predict , target.float())
         return loss_

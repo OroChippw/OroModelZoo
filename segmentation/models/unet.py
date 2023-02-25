@@ -114,7 +114,7 @@ class OutputHead(BaseModule):
 
 @MODELS.register_module()
 class UNet(BaseModule):
-    def __init__(self , classes=2 , pretrained=None , **cfg):
+    def __init__(self , num_classes=2 , pretrained=None , **cfg):
         super(UNet, self).__init__()
         self.pretrained = pretrained
         output_channels = [64,128,256,512,1024]
@@ -129,7 +129,7 @@ class UNet(BaseModule):
         self.decoder_1 = DecoderBlock(output_channels[3] , output_channels[1])
         self.decoder_0 = DecoderBlock(output_channels[2] , output_channels[0])
 
-        self.head_ = OutputHead(output_channels[1] , output_channels[0] , final_channels=classes)
+        self.head_ = OutputHead(output_channels[1] , output_channels[0] , final_channels=num_classes)
 
 
     def forward(self, x):
@@ -161,6 +161,6 @@ class UNet(BaseModule):
 
 
 if __name__ == '__main__':
-    model = UNet(classes=2)
+    model = UNet(num_classes=2)
     # print(model)
     # summary(model , (3,572,572))

@@ -1,3 +1,4 @@
 from .invertedres_block import InvertedresBlock
+from .aspp import ASPP
 
-all = ["InvertedresBlock" , ]
+__all__ = ["InvertedresBlock" , "ASPP"]

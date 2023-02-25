@@ -6,4 +6,5 @@ class HRNet():
     def __init__():
         pass
     
-    def __
+    def forward():
+        pass
