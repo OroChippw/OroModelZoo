@@ -14,7 +14,7 @@ class BCELoss(nn.Module):
         
     def forward(self , predict , target):
         if len(predict.shape) != len(target.shape):
-            label = torch.unsqueeze(target , 1)
+            target = torch.unsqueeze(target , 1)
         if self.use_sigmoid:
             loss_ = F.binary_cross_entropy_with_logits(predict , target.float())
         else:

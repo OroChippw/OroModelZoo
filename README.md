@@ -47,7 +47,7 @@
 + Replace VGG used in DeepLabv1 with a deeper ResNet
 - [] DeepLabV3
 - [] DeepLabV3+
-+ 
++ Add decoder based on DeepLabv3 to restore object edge information
 + 
 - [] HRNet 
 ### Detection

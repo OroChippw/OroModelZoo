@@ -54,7 +54,7 @@ class ASPP(nn.Module):
         
     def forward(self , x):
         input_ = x
-        b , c , h , w = input_.size()
+        b , c , w , h = input_.size()
         branch_1_conv1x1 = self.branch_1(input_)
         branch_2_conv3x3_r6 = self.branch_2(input_)
         branch_3_conv3x3_r12 = self.branch_3(input_)

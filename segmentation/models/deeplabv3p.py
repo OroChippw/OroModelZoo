@@ -56,10 +56,11 @@ class DeepLabV3p(BaseModule):
     
     def forward(self, x):
         input_ = x
-        b , c , h , w = input_.size()
+        b , c , w , h = input_.size()
         low_level_features , main_feature = self.backbone_(input_)
         
         main_feature_ = self.aspp_(main_feature)
+        # => Decoder
         low_level_features_ = self.lowlevel_conv(low_level_features)
         
         main_feature_ = F.interpolate(main_feature_ , 
