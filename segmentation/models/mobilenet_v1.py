@@ -1,7 +1,9 @@
+import math
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base_module import BaseModule
-from ..builder import BACKBONE
+
+from .base_module import BaseModule
+from ..builder import MODELS
 
 
 # BaseConv
@@ -13,7 +15,7 @@ class Conv(BaseModule):
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
                       kernel_size=3, stride=stride, padding=padding, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU6(inplace=True)
         )
 
     def forward(self, x):
@@ -27,19 +29,19 @@ class DSConvBlock(BaseModule):
     def __init__(self, in_channels, out_channels,
                  stride: int = 1, padding: int = 1):
         super(DSConvBlock, self).__init__()
-        # Depthwise
+        # Depthwise Conv
         self.DepthwiseBlock = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=in_channels,
                       kernel_size=3, stride=stride,
                       padding=1, groups=in_channels, bias=False),
             nn.BatchNorm2d(in_channels),
         )
-        # Pointwise
+        # Pointwise Conv
         self.PointwiseBlock = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
                       kernel_size=1, stride=1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU()
+            nn.ReLU6()
         )
 
     def forward(self, x):
@@ -49,7 +51,7 @@ class DSConvBlock(BaseModule):
 
         return result_
 
-@BACKBONE.register_module()
+@MODELS.register_module()
 class MobileNetv1(BaseModule):
     def __init__(self):
         super(MobileNetv1, self).__init__()
