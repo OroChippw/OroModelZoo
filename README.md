@@ -5,9 +5,10 @@
   At present, it is mainly used for personal study and experiment of OroChi Fang.Welcome everyone to submit and provide constructive suggestions for network reproduction, thank you🤞
 
 ## Top News
+**`2023-03`**:**Build Yolo**  
 **`2023-02`**:**Build some classic networks and backbones**  
 **`2023-01`**:**Learn about DistributeDataParallel training mode**
-**`2022-12`**:**Split and Build training framework**
+**`2022-12`**:**Split and Build training framework **
 **`2022-10`**: **Create repository for OroModelZoo🎂**
 
 ## Supported model and backbone
@@ -27,6 +28,8 @@
 + Reconstruct the time-consuming structure 
 + Neural Architecture Search  
 - [ ] ShuffleNetV1
++ Channel shuffle:,shuffle channel after this Conv(通道重排)
++ Pointwise Group Convolution:1 * 1Conv -> 1 * 1 Group Conv(逐点分组卷积)
 - [ ] ShuffleNetV2
 ### Segmentation
 - [x] UNet
@@ -48,7 +51,7 @@
 ### Detection
 - [ ] Fast R-CNN
 - [ ] Faster R-CNN
-- [ ] YOLOv3
+- [x] YOLOv3
 - [ ] YOLOv5
 - [ ] YOLOX
 
