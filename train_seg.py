@@ -22,11 +22,6 @@ from utils import (mkdir_or_exist  , update_config , setup_seed , init_dist,
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 NUM_GPU = torch.cuda.device_count()
 
-#---------------------------temp------------------------------ #
-
-
-#---------------------------temp------------------------------ #
-
 
 def args_parse():
     parser = argparse.ArgumentParser(description="OroModelZoo Segmentation")
@@ -94,7 +89,8 @@ def main():
         ngpus_per_node = torch.cuda.device_count()
         args.ngpus_per_node = ngpus_per_node
         '''
-            The first parameter of mp.spawn is a function, this function will execute all the steps of training, python will create multiple processes, each process will execute the main_worker function.
+            The first parameter of mp.spawn is a function, this function will execute all the steps of training, 
+                python will create multiple processes, each process will execute the main_worker function.
             The second parameter is the number of processes to open.
             The third parameter is the function argument of main_worker
         '''

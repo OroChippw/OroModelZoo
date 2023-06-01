@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 
 from ..builder import TRANSFORMS
-from functional import _brightness , _contrast , _hue , _sharpness , _saturation
+from .functional import _brightness , _contrast , _hue , _sharpness , _saturation
 
 @TRANSFORMS.register_module()
 class RandomDistort():

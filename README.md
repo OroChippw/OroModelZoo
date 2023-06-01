@@ -74,3 +74,6 @@ pytorch >= 1.9.0
 ```python
 # val.sh
 ```
+
+## License
+This project is licensed under the MIT License.

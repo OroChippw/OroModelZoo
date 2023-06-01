@@ -1,17 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from .base_module import BaseModule
 from ..builder import MODELS
 
-class BaseModule(nn.Module):
-    def __init__(self):
-        super(BaseModule, self).__init__()
-
-    def forward(self, x):
-        pass
-
-    def train(self, mode=True):
-        pass
 
 class EncoderBlock(BaseModule):
     def __init__(self , in_channels , out_channels , use_maxpool = True):

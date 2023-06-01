@@ -1,5 +1,5 @@
 import torch.nn as nn
-from ..base_module import BaseModule
+from .base_module import BaseModule
 from ..builder import BACKBONE
 
 

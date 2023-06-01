@@ -67,8 +67,8 @@ TRAIN:
   sync_bn: true
   fp-16: true
   optimizer: 'Adam'
-  momentum: '' # Used for SGD , dafault 0.9
-  weight_decay: '' # Used for SGD , dafault 0.0001
+  momentum: '0.9' # Used for SGD , dafault 0.9
+  weight_decay: '0.0001' # Used for SGD , dafault 0.0001
   lr: 0.001
   multistep_lr: true
   lr_factor: 0.1
