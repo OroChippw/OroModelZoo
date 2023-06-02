@@ -55,6 +55,9 @@
 - [ ] YOLOv5
 - [ ] YOLOX
 
+## Backbone
+- [ ] Vision Transformer
+
 ### Classfication
 
 ## Support Loss
