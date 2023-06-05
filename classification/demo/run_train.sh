@@ -1,0 +1,1 @@
+python train.py --num-classes 5 --data-path E:\\OroChiLab\\OroModelZoo\\data\\flower_photos --weights "" --epoches 30 --batch-size 8

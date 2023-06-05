@@ -178,7 +178,7 @@ def main_worker(gpu , args , cfg):
                                     shuffle=(train_sampler is None) , num_workers=args.nThreads , sampler=train_sampler)
     # Initialize error
     error_ = float('inf')
-    exit(0)
+    
     
     # Start journey
     for i in range(cfg.TRAIN.start_epoches , cfg.TRAIN.end_epoches):
@@ -208,11 +208,6 @@ def main_worker(gpu , args , cfg):
             loss_.backward()
             optimizer_.step()
             
-            
-    exit(0)
-    
-
-    
 
     # Init Automatic mixed precision GradScaler
     if args.fp16:
@@ -251,10 +246,6 @@ def main_worker(gpu , args , cfg):
 
     if distributed_:
         torch.nn.SyncBatchNorm.convert_sync_batchnorm(model_)
-
-    
-   
-
 
     metric_ = None
 
