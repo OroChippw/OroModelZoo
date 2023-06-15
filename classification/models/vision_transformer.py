@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from .base_module import BaseModule
-from ..builder import MODELS
+from base_module import BaseModule
+from . import MODELS
 
 class DropPath(BaseModule):
     def __init__(self , drop_ratio=0.):
