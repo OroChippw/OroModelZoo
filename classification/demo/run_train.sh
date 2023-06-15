@@ -1,1 +1,1 @@
-python train.py --num-classes 5 --data-path E:\\OroChiLab\\OroModelZoo\\data\\flower_photos --weights "" --epoches 30 --batch-size 8
+python train.py --num-classes 5 --data-path E:\\OroChiLab\\OroModelZoo\\data\\flower_photos --weights "E:\\OroChiLab\\OroModelZoo\\classification\\weights\\jx_vit_base_patch16_224_in21k-e5005f0a.pth" --epoches 30 --batch-size 8
