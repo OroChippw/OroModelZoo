@@ -109,7 +109,7 @@ def k_armed_bandit_one_run(qstar,epsilon,nStep,QUpdtAlgo='sample_average',alpha=
         r[t]: reward series for each step in one run
         Q[k]: reward sample average up to t-1 for action[k]
         aNum[k]: The number of being selected for action[k]
-        optRatio[t]: Ration of optimal action being selected over tim
+        optRatio[t]: Ration of optimal action being selected over time
     """
 
     K     = len(qstar)
